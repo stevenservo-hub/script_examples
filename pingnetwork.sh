@@ -10,6 +10,7 @@ do
 	done
 done
 
-sudo nmap -sS 20 -iL octets.txt
+sudo nmap -sS 20 -iL octets.txt | tee results.txt
+rm octets.txt
 exit
 
