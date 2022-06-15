@@ -11,7 +11,7 @@ echo "\____/|_|   \__,_|\__\___|      \____/ \___/ \__|";
 echo "                                                 ";
 echo "                                                 ";
 
-ifconfig | grep "broadcast" | cut -d " " -f 10 | cut -d "." -f 1,2,3 | uniq > octets.txt
+ip addr | grep inet | cut -d " " -f 8 | cut -d "." -f 1,2,3 | sed 's/[a-z]//g ; /^[[:space:]]*$/d' > octets.txt
 echo "================================================="
 cat octets.txt | while read line || [[ -n $line ]];
 do
