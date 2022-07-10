@@ -1,6 +1,6 @@
 #!/usr/bin/bash
+ip addr | grep "\inet\b" | cut -d " " -f 6 | cut -d "." -f 1,2,3 | uniq > octets.txt
 
-ifconfig | grep "broadcast" | cut -d " " -f 10 | cut -d "." -f 1,2,3 | uniq > octets.txt
 echo "looking for active devices on the network"
 cat octets.txt | while read line || [[ -n $line ]];
 do
