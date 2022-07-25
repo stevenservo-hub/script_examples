@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-
+ROOT_UID=0
 E_NOTROOT=87 # Non-root exit error.
 # Run as root, of course.
 
