@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+E_NOTROOT=87 # Non-root exit error.
+# Run as root, of course.
+
 add_user()
 {
 
@@ -9,11 +12,17 @@ add_user()
 	read -p "add comments: " COMMENTS
 	read -p "Continue? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
 	echo "Adding the user $USER.."
-	sudo useradd -c "$COMMENTS" $USER
-	echo -e "$PASSWORD\n$PASSWORD" | sudo passwd $USER
+	useradd -c "$COMMENTS" $USER
+	echo -e "$PASSWORD\n$PASSWORD" | passwd $USER
 	echo "Added user $USER with password $PASSWORD"
 	read -p "Would you like to give the user SUDO access? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
-	sudo usermod -a -G sudo $USER
+	usermod -aG sudo $USER
 }
+
 echo "script started.."
+if [ "$UID" -ne "$ROOT_UID" ]
+then
+echo "Must be root to run this script."
+exit $E_NOTROOT
+fi
 add_user
