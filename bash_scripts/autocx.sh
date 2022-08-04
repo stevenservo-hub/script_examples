@@ -62,7 +62,7 @@ build_config() {
 		echo "same => n,Hangup()"
 	} >> "$sip_dir"/extensions.conf
 echo "#include customers/$last/extensions.conf" >> /etc/asterisk/customers/extensions.conf
-echo "#include customers/$last/sip.conf" >> etc/asterisk/customers/sip.conf
+echo "#include customers/$last/sip.conf" >> /etc/asterisk/customers/sip.conf
 }
 
 while test $# -gt 0; do
@@ -87,7 +87,13 @@ while test $# -gt 0; do
                    exit 1;
                    ;;
           esac
-  done  
+done  
+
+if [[ -z $phone ]] || [[ -z $last ]];
+then print_usage
+exit
+fi
+
 password=''
 echo "please enter sip users secret:"
 while IFS= read -r -s -n1 char; do
@@ -105,7 +111,7 @@ while IFS= read -r -s -n1 char; do
   fi
 done
 
-mk_files
-build_config
+#mk_files
+#build_config
 
 exit
