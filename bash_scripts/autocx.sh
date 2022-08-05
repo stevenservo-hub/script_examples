@@ -25,6 +25,25 @@ print_usage() {
 printf "Usage: autocx -phone '5555555555' -last 'lastname' " #Todo, add usage 
 }
 
+#Prompt user for sip secret.
+sip_secret() {
+password=''
+echo "please enter sip users secret:"
+while IFS= read -r -s -n1 char; do
+  [[ -z $char ]] && { printf '\n'; break; } # ENTER pressed; output \n and break.
+  if [[ $char == $'\x7f' ]]; then # backspace was pressed
+      # Remove last char from output variable.
+      [[ -n $password ]] && password=${password%?}
+      # Erase '*' to the left.
+      printf '\b \b' 
+  else
+    # Add typed char to output variable.
+    password+=$char
+    # Print '*' in its stead.
+    printf '*'
+  fi
+done
+}
 # build file system just a rough draft need to add a more elegant apr oach
 mk_files() {
 sip_dir=/etc/asterisk/customers/"$last"
@@ -94,23 +113,7 @@ then print_usage
 exit
 fi
 
-password=''
-echo "please enter sip users secret:"
-while IFS= read -r -s -n1 char; do
-  [[ -z $char ]] && { printf '\n'; break; } # ENTER pressed; output \n and break.
-  if [[ $char == $'\x7f' ]]; then # backspace was pressed
-      # Remove last char from output variable.
-      [[ -n $password ]] && password=${password%?}
-      # Erase '*' to the left.
-      printf '\b \b' 
-  else
-    # Add typed char to output variable.
-    password+=$char
-    # Print '*' in its stead.
-    printf '*'
-  fi
-done
-
+sip_secret
 mk_files
 build_config
 
