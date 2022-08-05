@@ -111,7 +111,7 @@ while IFS= read -r -s -n1 char; do
   fi
 done
 
-#mk_files
-#build_config
+mk_files
+build_config
 
 exit
