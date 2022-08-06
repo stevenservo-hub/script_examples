@@ -22,7 +22,8 @@ fi
 
 # Print usage statement, to guide users
 print_usage() {
-printf "Usage: autocx -phone '5555555555' -last 'lastname'\n" #Todo, add usage 
+printf "Usage: autocx -phone '15555555555' -last 'lastname'\n
+Please ensure to add a 1 to the beginning of the number\n" #Todo, add usage 
 }
 
 # Prompt user for input, only if flags are not provided
@@ -127,7 +128,8 @@ if [[ -z $phone ]] || [[ -z $last ]];
 then prompt_info
 fi
 
-#ADD regex to test for number format HERE
+# Remove dashes or parens from phone number if they were added
+phone=$(echo "$phone" | tr -d -c "[:digit:]")
 
 sip_secret
 mk_files
