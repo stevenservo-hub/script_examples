@@ -77,7 +77,7 @@ build_config() {
 		echo ""
 		echo "[$last]"
 		echo "exten => _1NXXXXXXXXX,1,Set(CALLERID(all)=\"$last\" <$phone>)"
-		echo "same => n,Dial(SIP/65057962*\${EXTEN}@flowroute)"
+		echo "same => n,Dial(SIP/00000000*\${EXTEN}@flowroute)"
 		echo "same => n,Hangup()"
 	} >> "$sip_dir"/extensions.conf
 echo "#include customers/$last/extensions.conf" >> /etc/asterisk/customers/extensions.conf
