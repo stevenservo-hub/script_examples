@@ -10,7 +10,7 @@ set -e
 # keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # echo an error message before exiting
-trap 'echo "\"${last_command}\"command returned exit code $?."' EXIT
+trap 'echo "\"${last_command}\" command returned exit code $?."' EXIT
 
 #This function checks the current user to ensure root
 root_check() {
@@ -22,7 +22,13 @@ fi
 
 # Print usage statement, to guide users
 print_usage() {
-printf "Usage: autocx -phone '5555555555' -last 'lastname' " #Todo, add usage 
+printf "Usage: autocx -phone '5555555555' -last 'lastname'\n" #Todo, add usage 
+}
+
+# Prompt user for input, only if flags are not provided
+prompt_info() {
+read -p 'Please provide users assigned phone number (no dashes i.e 5095550155): ' phone
+read -p 'Users lastname: ' last
 }
 
 #Prompt user for sip secret.
@@ -44,14 +50,17 @@ while IFS= read -r -s -n1 char; do
   fi
 done
 }
+
 # build file system just a rough draft need to add a more elegant apr oach
 mk_files() {
 sip_dir=/etc/asterisk/customers/"$last"
 root_check	
-mkdir "$sip_dir"
+mkdir "$sip_dir" # It occured to me there could be multiple users with the same last name. This has been tested, as long as set -e
+                 # remains it will exit as "directory exists" instead of overwriting, but maybe this should be explicitly handled
 touch "$sip_dir"/sip.conf && touch "$sip_dir"/extensions.conf 
 chown -R asterisk:asterisk "$sip_dir"
 }
+
 # Building the config files  	
 build_config() {
 	{    # Needs overhaul. This is quickest way to get it up and going
@@ -84,6 +93,7 @@ echo "#include customers/$last/extensions.conf" >> /etc/asterisk/customers/exten
 echo "#include customers/$last/sip.conf" >> /etc/asterisk/customers/sip.conf
 }
 
+# Added flags for convenience sake, if left blank (or not complete) whoever runs the script will be prompted instead
 while test $# -gt 0; do
            case "$1" in
 		-phone)
@@ -100,6 +110,10 @@ while test $# -gt 0; do
 		    print_usage
 		    exit 1;
                     ;;
+                --help)
+		    print_usage
+		    exit 1;
+                    ;;
                 *)
                    echo "$1 is not a recognized flag!"
 		   print_usage
@@ -108,13 +122,17 @@ while test $# -gt 0; do
           esac
 done  
 
+# If flags are not used we will prompt the user for the needed info
 if [[ -z $phone ]] || [[ -z $last ]];
-then print_usage
-exit
+then prompt_info
 fi
+
+#ADD regex to test for number format HERE
 
 sip_secret
 mk_files
 build_config
+
+printf "Build complete!\n"
 
 exit
