@@ -22,7 +22,7 @@ fi
 
 # Print usage statement, to guide users
 print_usage() {
-printf "Usage: autocx -phone '15555555555' -last 'lastname'\n
+printf "Usage: autocx -p or --phone '15555555555' -l or -last 'lastname'\n
 Please ensure to add a 1 to the beginning of the number\n" #Todo, add usage 
 }
 
@@ -97,21 +97,17 @@ echo "#include customers/$last/sip.conf" >> /etc/asterisk/customers/sip.conf
 # Added flags for convenience sake, if left blank (or not complete) whoever runs the script will be prompted instead
 while test $# -gt 0; do
            case "$1" in
-		-phone)
+		-p | --phone)
                     shift
 		    phone=$1
                     shift
                     ;;
-                -last)
+                -l | --last)
                     shift
                     last=$1
                     shift
                     ;;
-                -h)
-		    print_usage
-		    exit 1;
-                    ;;
-                --help)
+                -h | --help)
 		    print_usage
 		    exit 1;
                     ;;
@@ -130,6 +126,7 @@ fi
 
 # Remove dashes or parens from phone number if they were added
 phone=$(echo "$phone" | tr -d -c "[:digit:]")
+last=${last^}
 
 sip_secret
 mk_files
