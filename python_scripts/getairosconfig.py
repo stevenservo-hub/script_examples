@@ -5,83 +5,72 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import getpass
 import ipaddress
 
-#Prompts for login information
-uservar = input("Enter Username: ") or default
-#using getpass to mask password.
-passvar = getpass.getpass("Enter Password: ")
-
-#Bypass insecure request warning 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-login_url = 'https://{0}/api/auth'
-url_cgi = 'https://{0}/cfg.cgi',
-
-cidr = input('Provide IP in CIDR notation: ')
-
-# Store a list of a subnet to a variable
-ip_addr = [str(ip) for ip in ipaddress.IPv4Network(cidr)]
-
-#Removes Network and Broadcast address leavingonly usable ip's
-ip_addr.pop(0)
-ip_addr.pop(-1)
-
-#Main loop
-for ip in ip_addr:
-
-    # session 
+def login(username, password, ip):
+    login_url = 'https://{}/api/auth'.format(ip)
     with requests.Session() as s:
-
-        # login 
         try:
             r = s.post(
-                url=login_url.format(ip),
+                url=login_url,
                 data={
-                'username': uservar,
-                'password': passvar, 
+                    'username': username,
+                    'password': password,
                 },
                 verify=False,
                 timeout=2,
-             )   
-            
-            #raise for error handling.
+            )
             r.raise_for_status()
-       
-        #Basic error handling, will also catch other devices that are in the
-        #the subnet such as microtiks so that config files are not created with
-        #error messages written to them, as of now im printing to the terminal
-        #so you can see whats happening but these can be removed. This is kind
-        #of noisy. In general this could use improvement.
+            return s
         except requests.exceptions.HTTPError as errh:
-            print (" Http Error:",errh)
-            continue
-
+            print("Http Error:", errh)
         except requests.exceptions.ConnectionError as errc:
-            print (" Error Connecting:",errc)
-            continue
-
+            print("Error Connecting:", errc)
         except requests.exceptions.Timeout as errt:
-            print ("Timeout Error:",errt)
-            continue
-
+            print("Timeout Error:", errt)
         except requests.exceptions.RequestException as e:
-            print('Unknown Error: Skipping',e)
-            continue
-        
-        responses = {}
+            print("Unknown Error: Skipping", e)
+        return None
 
-        #Grabs the configuration.
-        for url in url_cgi:
-            print('Getting config for '+ip)
-            url = url.format(ip)
-            r = s.get(
-            url=url,
+def get_config(session, ip):
+    url_cgi = 'https://{}/cfg.cgi'.format(ip)
+    try:
+        r = session.get(
+            url=url_cgi,
             verify=False,
             allow_redirects=True
         )
-            #renames config file for unique and easy to reference config names
-            url = (ip+'_backup.cfg') 
+        if r.status_code == 200:
+            # Renames config file for unique and easy-to-reference config names
+            filename = ip + '_backup.cfg'
+            # Writes config to file
+            open(filename, 'wb').write(r.content)
+            print('Config saved for', ip)
+        else:
+            print('Failed to retrieve config for', ip)
+    except requests.exceptions.RequestException as e:
+        print('Unknown Error: Skipping', e)
 
-            #Writes config to file            
-            open(url, 'wb').write(r.content)
+# Bypass insecure request warning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-exit() 
+# Prompts for login information
+username = input("Enter Username: ") or default
+# Using getpass to mask password.
+password = getpass.getpass("Enter Password: ")
+
+# Get IP in CIDR notation
+cidr = input('Provide IP in CIDR notation: ')
+
+# Store a list of subnet IPs in a variable
+ip_addr = [str(ip) for ip in ipaddress.IPv4Network(cidr)]
+
+# Removes Network and Broadcast address leaving only usable IPs
+ip_addr.pop(0)
+ip_addr.pop(-1)
+
+# Main loop
+for ip in ip_addr:
+    session = login(username, password, ip)
+    if session:
+        get_config(session, ip)
+
+exit()
