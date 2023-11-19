@@ -14,52 +14,52 @@ trap 'echo "\"${last_command}\" command returned exit code $?."' EXIT
 
 #This function checks the current user to ensure root
 root_check() {
-if [ "$EUID" -ne 0 ]
-then echo "Please run as root"
-exit
-fi
+	if [ "$EUID" -ne 0 ]
+	then echo "Please run as root"
+	exit
+	fi
 }
 
 # Print usage statement, to guide users
 print_usage() {
-printf "Usage: autocx -p or --phone '15555555555' -l or -last 'lastname'\n
-Please ensure to add a 1 to the beginning of the number\n" #Todo, add usage 
+	printf "Usage: autocx -p or --phone '15555555555' -l or -last 'lastname'\n
+	Please ensure to add a 1 to the beginning of the number\n" #Todo, add usage 
 }
 
 # Prompt user for input, only if flags are not provided
 prompt_info() {
-read -p 'Please provide users assigned phone number (no dashes i.e 5095550155): ' phone
-read -p 'Users lastname: ' last
+	read -p 'Please provide users assigned phone number (no dashes i.e 5095550155): ' phone
+	read -p 'Users lastname: ' last
 }
 
 #Prompt user for sip secret.
 sip_secret() {
-password=''
-echo "please enter sip users secret:"
-while IFS= read -r -s -n1 char; do
-  [[ -z $char ]] && { printf '\n'; break; } # ENTER pressed; output \n and break.
-  if [[ $char == $'\x7f' ]]; then # backspace was pressed
-      # Remove last char from output variable.
-      [[ -n $password ]] && password=${password%?}
-      # Erase '*' to the left.
-      printf '\b \b' 
-  else
-    # Add typed char to output variable.
-    password+=$char
-    # Print '*' in its stead.
-    printf '*'
-  fi
-done
+	password=''
+	echo "please enter sip users secret:"
+	while IFS= read -r -s -n1 char; do
+	  [[ -z $char ]] && { printf '\n'; break; } # ENTER pressed; output \n and break.
+	  if [[ $char == $'\x7f' ]]; then # backspace was pressed
+	      # Remove last char from output variable.
+	      [[ -n $password ]] && password=${password%?}
+	      # Erase '*' to the left.
+	      printf '\b \b' 
+	  else
+	    # Add typed char to output variable.
+	    password+=$char
+	    # Print '*' in its stead.
+	    printf '*'
+	  fi
+	done
 }
 
 # build file system just a rough draft need to add a more elegant apr oach
 mk_files() {
-sip_dir=/etc/asterisk/customers/"$last"
-root_check	
-mkdir "$sip_dir" # It occured to me there could be multiple users with the same last name. This has been tested, as long as set -e
-                 # remains it will exit as "directory exists" instead of overwriting, but maybe this should be explicitly handled
-touch "$sip_dir"/sip.conf && touch "$sip_dir"/extensions.conf 
-chown -R asterisk:asterisk "$sip_dir"
+	sip_dir=/etc/asterisk/customers/"$last"
+	root_check	
+	mkdir "$sip_dir" # It occured to me there could be multiple users with the same last name. This has been tested, as long as set -e
+	                 # remains it will exit as "directory exists" instead of overwriting, but maybe this should be explicitly handled
+	touch "$sip_dir"/sip.conf && touch "$sip_dir"/extensions.conf 
+	chown -R asterisk:asterisk "$sip_dir"
 }
 
 # Building the config files  	
@@ -90,8 +90,8 @@ build_config() {
 		echo "same => n,Dial(SIP/00000000*\${EXTEN}@flowroute)"
 		echo "same => n,Hangup()"
 	} >> "$sip_dir"/extensions.conf
-echo "#include customers/$last/extensions.conf" >> /etc/asterisk/customers/extensions.conf
-echo "#include customers/$last/sip.conf" >> /etc/asterisk/customers/sip.conf
+	echo "#include customers/$last/extensions.conf" >> /etc/asterisk/customers/extensions.conf
+	echo "#include customers/$last/sip.conf" >> /etc/asterisk/customers/sip.conf
 }
 
 # Added flags for convenience sake, if left blank (or not complete) whoever runs the script will be prompted instead
