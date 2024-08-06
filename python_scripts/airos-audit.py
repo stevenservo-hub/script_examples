@@ -35,7 +35,7 @@ logging.info('Script execution initiated')
 
 
 def send_email():  # Sends email with spreadsheet as attachment
-    receivers = ['kelly@rodeotv.net', 'tac@rodeotv.net']
+    receivers = ['', 't']
     now = datetime.now()
     date_str = now.strftime("%Y-%m-%d")
     filename = f'Aircontrol_audit_{date_str}.xlsx'
